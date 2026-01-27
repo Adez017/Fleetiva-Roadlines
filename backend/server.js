@@ -23,7 +23,8 @@ app.use(
 );
 
 /* ================= FIREBASE ADMIN ================= */
-const serviceAccountPath = "/etc/secrets/firebase-service-account.json";
+// Use the variable from .env if it exists, otherwise default to the cloud path
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT || "/etc/secrets/firebase-service-account.json";
 
 if (!admin.apps.length) {
   if (!fs.existsSync(serviceAccountPath)) {
