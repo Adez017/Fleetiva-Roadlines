@@ -1,27 +1,70 @@
-import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppContext } from './context/AppContext';
-import Navbar from './components/Navbar';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import React, { useContext } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
+import { AppContext } from "./context/AppContext";
+
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import CustomerDashboard from "./pages/customer/CustomerDashboard";
+
+/* ================= PROTECTED ROUTE ================= */
+const ProtectedRoute = ({ children, role }) => {
   const { user } = useContext(AppContext);
-  return user ? children : <Navigate to="/login" />;
+
+  if (!user) return <Navigate to="/login" />;
+  if (role && user.role !== role) return <Navigate to="/" />;
+
+  return children;
 };
 
+/* ================= ROOT REDIRECT ================= */
+const RootRedirect = () => {
+  const { user } = useContext(AppContext);
+
+  if (!user) return <Navigate to="/login" />;
+
+  return user.role === "admin"
+    ? <Navigate to="/admin" />
+    : <Navigate to="/dashboard" />;
+};
+
+/* ================= APP ================= */
 const App = () => {
   const { user } = useContext(AppContext);
 
   return (
     <Router>
       {user && <Navbar />}
+
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        {/* Public */}
+        <Route path="/login" element={user ? <RootRedirect /> : <Login />} />
+        <Route path="/register" element={user ? <RootRedirect /> : <Register />} />
+
+        {/* Admin */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Customer */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute role="customer">
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Root */}
+        <Route path="/" element={<RootRedirect />} />
       </Routes>
     </Router>
   );

@@ -1,30 +1,33 @@
-import { createContext, useState, useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { createContext, useState, useEffect, useContext } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 export const AppContext = createContext();
+
+export const useApp = () => useContext(AppContext);
 
 export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        localStorage.setItem("userToken", user.accessToken);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        localStorage.setItem("userToken", firebaseUser.accessToken);
       } else {
         setUser(null);
         localStorage.removeItem("userToken");
       }
     });
+
     return () => unsubscribe();
   }, []);
 
   const logout = async () => {
     setLoading(true);
     try {
-      await auth.signOut();
+      await signOut(auth);
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -44,6 +47,11 @@ function FullScreenLoader() {
   return (
     <div style={styles.overlay}>
       <div style={styles.spinner}></div>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
