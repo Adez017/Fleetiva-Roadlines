@@ -171,7 +171,8 @@ export default function AdminDashboard() {
   const updateBilty = async (event) => {
     event.preventDefault();
     try {
-      const { booking, ...payload } = biltyForm;
+      const { booking: _booking, ...payload } = biltyForm;
+
       await api.patch(`/bilty/${editingBiltyId}`, payload);
       alert("Bilty Updated Successfully!");
       setEditingBiltyId(null);
