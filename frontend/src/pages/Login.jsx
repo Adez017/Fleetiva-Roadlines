@@ -36,6 +36,16 @@ export default function Login() {
     return err?.message || "Login failed";
   };
 
+  const isFirebaseAvailable = async () => {
+    if (!hasFirebaseConfig) return false;
+    try {
+      const response = await api.get("/auth/firebase/status");
+      return Boolean(response.data?.available);
+    } catch (err) {
+      return false;
+    }
+  };
+
   const validateLoginForm = ({ email, password }) => {
     if (!email || !password) {
       return "Email and password are required.";
@@ -69,7 +79,7 @@ export default function Login() {
 
     try {
       let role;
-      if (hasFirebaseConfig) {
+      if (hasFirebaseConfig && (await isFirebaseAvailable())) {
         if (!auth) {
           throw new Error("Firebase auth is unavailable.");
         }
@@ -88,7 +98,8 @@ export default function Login() {
         role = response.data.user.role;
       }
 
-      if (role === "admin") navigate("/admin", { replace: true });
+      if (role === "superadmin") navigate("/superadmin", { replace: true });
+      else if (role === "admin") navigate("/admin", { replace: true });
       else if (role === "driver") navigate("/driver", { replace: true });
       else navigate("/dashboard", { replace: true });
     } catch (err) {
@@ -116,10 +127,15 @@ export default function Login() {
     setLoading(true);
 
     try {
+      if (!(await isFirebaseAvailable())) {
+        setError("Firebase authentication is unavailable on the server. Please use email/password login.");
+        return;
+      }
       const credential = await signInWithPopup(auth, googleProvider);
       const idToken = await credential.user.getIdToken();
       const role = await exchangeFirebaseToken(idToken);
-      if (role === "admin") navigate("/admin", { replace: true });
+      if (role === "superadmin") navigate("/superadmin", { replace: true });
+      else if (role === "admin") navigate("/admin", { replace: true });
       else if (role === "driver") navigate("/driver", { replace: true });
       else navigate("/dashboard", { replace: true });
     } catch (err) {
