@@ -1,3 +1,4 @@
+
 const { MongoClient, ServerApiVersion } = require("mongodb");
 let MongoMemoryServer;
 try {
@@ -239,3 +240,7 @@ module.exports = { connectMongo, client: () => client, stopInMemoryMongo };
 // }
 
 // module.exports = { connectMongo, client };
+const { connectMongo, stopInMemoryMongo } = require('./db2');
+
+module.exports = { connectMongo, stopInMemoryMongo };
+

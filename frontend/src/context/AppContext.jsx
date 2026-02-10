@@ -1,42 +1,48 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../firebase";
-
-export const AppContext = createContext();
-
-export const useApp = () => useContext(AppContext);
+import { useState, useEffect } from "react";
+import api from "../api/axios";
+import { AppContext } from "./appContextStore";
+import { safeStorage } from "../utils/storage";
 
 export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        localStorage.setItem("userToken", firebaseUser.accessToken);
-      } else {
-        setUser(null);
-        localStorage.removeItem("userToken");
-      }
-    });
+    const token = safeStorage.get("accessToken");
+    if (!token) return;
 
-    return () => unsubscribe();
+    setLoading(true);
+    api
+      .get("/auth/me")
+      .then((res) => {
+        const profile = res.data.user;
+        setUser(profile);
+        safeStorage.set("role", profile.role);
+      })
+      .catch(() => {
+        safeStorage.remove("accessToken");
+        safeStorage.remove("role");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const logout = async () => {
     setLoading(true);
     try {
-      await signOut(auth);
+      await api.post("/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      safeStorage.remove("accessToken");
+      safeStorage.remove("role");
+      setUser(null);
       setLoading(false);
     }
   };
 
   return (
-    <AppContext.Provider value={{ loading, setLoading, user, logout }}>
+    <AppContext.Provider value={{ loading, setLoading, user, setUser, logout }}>
       {loading && <FullScreenLoader />}
       {children}
     </AppContext.Provider>

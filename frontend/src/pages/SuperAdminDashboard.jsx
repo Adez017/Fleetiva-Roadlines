@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import api from "../api/axios";
 
 export default function SuperAdminDashboard() {
@@ -14,8 +15,8 @@ export default function SuperAdminDashboard() {
     try {
       const res = await api.get("/tenants");
       setTenants(res.data);
-    } catch (err) {
-      console.error("Fetch error:", err);
+    } catch (error) {
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -25,13 +26,18 @@ export default function SuperAdminDashboard() {
     try {
       await api.patch(`/tenants/${id}/status`, { isActive: !currentStatus });
       fetchTenants();
-    } catch (err) {
+    } catch (error) {
+      console.error("Error updating tenant status:", error);
       alert("Error updating tenant status");
     }
   };
 
   return (
     <div className="page">
+      <Helmet>
+        <title>Super Admin Dashboard - Fleetiva Roadlines</title>
+        <meta name="description" content="Manage tenants, subscriptions, and system-wide settings." />
+      </Helmet>
       <div className="page-content">
         <div className="page-header">
           <div>

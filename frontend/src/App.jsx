@@ -1,4 +1,5 @@
 import React, { useContext, useMemo } from "react";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,11 +8,17 @@ import {
 } from "react-router-dom";
 import { AppContext } from "./context/AppContext";
 
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AppContext } from "./context/appContextStore";
+import { safeStorage } from "./utils/storage";
+
+
 import Navbar from "./components/Navbar";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import AdminDashboard from "./pages/AdminDashboard";
-import Dashboard from "./pages/Dashboard";
+import AdminDashboardPage from "./pages/AdminDashboard";
+import CustomerDashboard from "./pages/CustomerDashboard";
 import DriverDashboard from "./pages/DriverDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import SystemLogs from "./pages/SystemLogs";
@@ -23,20 +30,21 @@ import Stats from "./pages/Stats";
 import MyLoads from "./pages/MyLoads";
 
 const ProtectedRoute = ({ children, role }) => {
-  const { user } = useContext(AppContext);
-  const currentRole = user?.role || localStorage.getItem("role");
+  const { user, loading } = useContext(AppContext);
+  const currentRole = user?.role || safeStorage.get("role");
 
+  if (loading) return null;
   if (!user) return <Navigate to="/login" />;
   if (role && currentRole && currentRole !== role) return <Navigate to="/" />;
 
   return children;
 };
 
-/* ================= ROOT REDIRECT ================= */
 const RootRedirect = () => {
-  const { user } = useContext(AppContext);
-  const role = user?.role || localStorage.getItem("role");
+  const { user, loading } = useContext(AppContext);
+  const role = user?.role || safeStorage.get("role");
 
+  if (loading) return null;
   if (!user) return <Navigate to="/login" />;
 
   if (role === "superadmin") return <Navigate to="/superadmin" />;
@@ -45,7 +53,6 @@ const RootRedirect = () => {
   return <Navigate to="/dashboard" />;
 };
 
-/* ================= APP ================= */
 const App = () => {
   const { user } = useContext(AppContext);
 
@@ -56,8 +63,7 @@ const App = () => {
       {showNavbar && <Navbar />}
 
       <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        {/* Public */}
+        <Route path="/" element={user ? <RootRedirect /> : <LandingPage />} />
         <Route path="/login" element={user ? <RootRedirect /> : <Login />} />
         <Route
           path="/register"
@@ -65,17 +71,15 @@ const App = () => {
         />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Admin */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute role="admin">
-              <AdminDashboard />
+              <AdminDashboardPage />
             </ProtectedRoute>
           }
         />
 
-        {/* Super Admin */}
         <Route
           path="/superadmin"
           element={
@@ -93,7 +97,6 @@ const App = () => {
           }
         />
 
-        {/* Driver */}
         <Route
           path="/driver"
           element={
@@ -103,12 +106,11 @@ const App = () => {
           }
         />
 
-        {/* Customer */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute role="customer">
-              <Dashboard />
+              <CustomerDashboard />
             </ProtectedRoute>
           }
         />
