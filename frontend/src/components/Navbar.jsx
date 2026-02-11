@@ -16,8 +16,20 @@ const getRole = (user) => user?.role || safeStorage.get("role") || "customer";
 export default function Navbar() {
   const { user, logout } = useContext(AppContext);
   const role = getRole(user);
+
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
+
+  // ✅ Hooks must be above early return
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!dropdownRef.current?.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   if (!user) return null;
 
@@ -29,17 +41,6 @@ export default function Navbar() {
         : role === "driver"
           ? "/driver"
           : "/dashboard";
-
-  // close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!dropdownRef.current?.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
 
   return (
     <nav className="navbar">
@@ -67,8 +68,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Avatar Section */}
-        {/* Avatar Section */}
         <div className="navbar-actions" ref={dropdownRef}>
           <div
             className="avatar"
@@ -83,11 +82,9 @@ export default function Navbar() {
               <NavLink to="/profile" className="dropdown-item">
                 👤 My Profile
               </NavLink>
-
               <NavLink to="/stats" className="dropdown-item">
                 📊 My Stats
               </NavLink>
-
               <NavLink to="/my-loads" className="dropdown-item">
                 🚚 My Loads
               </NavLink>

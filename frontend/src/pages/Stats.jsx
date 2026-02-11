@@ -35,11 +35,11 @@ export default function Stats() {
     const pending = list.filter((b) => b.paymentStatus === "pending");
     const totalEarnings = paid.reduce(
       (s, b) => s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
-      0
+      0,
     );
     const pendingAmount = pending.reduce(
       (s, b) => s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
-      0
+      0,
     );
     const now = new Date();
     const thisMonth = now.getMonth();
@@ -51,26 +51,24 @@ export default function Stats() {
       })
       .reduce(
         (s, b) => s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
-        0
+        0,
       );
     const pastContracts = list.filter((b) => b.status === "delivered");
     const currentWork = list.filter(
-      (b) => b.status === "assigned" || b.status === "in-transit"
+      (b) => b.status === "assigned" || b.status === "in-transit",
     );
     const avgPerDelivery =
       pastContracts.length > 0
         ? pastContracts.reduce(
-            (s, b) =>
-              s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
-            0
+            (s, b) => s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
+            0,
           ) / pastContracts.length
         : 0;
     const futureEstimate =
       currentWork.length > 0
         ? currentWork.reduce(
-            (s, b) =>
-              s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
-            0
+            (s, b) => s + (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
+            0,
           )
         : avgPerDelivery;
 
@@ -124,7 +122,7 @@ export default function Stats() {
                   {formatMoney(totalEarnings)}
                 </span>
                 <span className="stats-earnings-meta">
-                  {paidCount} paid delivery{paidCount !== 1 ? "ies" : ""}
+                  {paidCount} paid deliver{paidCount !== 1 ? "ies" : "y"}
                 </span>
               </div>
             </div>
@@ -159,7 +157,9 @@ export default function Stats() {
         {/* Past contracts */}
         <section className="stats-section">
           <h2 className="stats-section-title">Past contracts</h2>
-          <p className="stats-section-desc">Completed deliveries (delivered).</p>
+          <p className="stats-section-desc">
+            Completed deliveries (delivered).
+          </p>
           {pastContracts.length === 0 ? (
             <div className="stats-empty-card">
               <span className="stats-empty-icon" aria-hidden="true">
@@ -188,7 +188,7 @@ export default function Stats() {
                   <div className="stats-contract-meta">
                     <span className="stats-contract-amount">
                       {formatMoney(
-                        (Number(b.amount) || 0) + (Number(b.gstAmount) || 0)
+                        (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
                       )}
                     </span>
                     <span
@@ -208,9 +208,7 @@ export default function Stats() {
         {/* Current work */}
         <section className="stats-section">
           <h2 className="stats-section-title">Current work</h2>
-          <p className="stats-section-desc">
-            Assigned & in-transit shipments.
-          </p>
+          <p className="stats-section-desc">Assigned & in-transit shipments.</p>
           {currentWork.length === 0 ? (
             <div className="stats-empty-card">
               <span className="stats-empty-icon" aria-hidden="true">
@@ -245,7 +243,7 @@ export default function Stats() {
                   <div className="stats-contract-meta">
                     <span className="stats-contract-amount">
                       {formatMoney(
-                        (Number(b.amount) || 0) + (Number(b.gstAmount) || 0)
+                        (Number(b.amount) || 0) + (Number(b.gstAmount) || 0),
                       )}
                     </span>
                     <span
@@ -291,7 +289,9 @@ export default function Stats() {
                 🔮
               </span>
               <div className="stats-future-body">
-                <span className="stats-future-label">Next month (estimate)</span>
+                <span className="stats-future-label">
+                  Next month (estimate)
+                </span>
                 <span className="stats-future-value stats-future-value-muted">
                   Based on your activity
                 </span>
