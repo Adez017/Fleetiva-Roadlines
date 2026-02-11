@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import api from "../api/axios";
-import { getApiBaseUrl } from "../api/baseUrl";
-import { safeStorage } from "../utils/storage";
 import { toast } from "react-hot-toast";
+import { downloadFile } from "../utils/download";
 import UserSection from "../components/admin/UserSection";
 import LoadSection from "../components/admin/LoadSection";
 import BookingSection from "../components/admin/BookingSection";
@@ -213,18 +212,23 @@ export default function AdminDashboard() {
     setter((prev) => ({ ...prev, [name]: value }));
   };
 
-  const API_BASE = getApiBaseUrl();
+  const downloadBilty = async (id) => {
+    try {
+      await downloadFile(`/booking/${id}/bilty`, `bilty-${id}.pdf`);
+      toast.success("Bilty downloaded successfully");
+    } catch {
+      toast.error("Failed to download Bilty");
+    }
+  };
 
-  const downloadBilty = (id) =>
-    window.open(
-      `${API_BASE}/booking/${id}/bilty?token=${safeStorage.get("accessToken")}`,
-      "_blank"
-    );
-  const downloadInvoice = (id) =>
-    window.open(
-      `${API_BASE}/booking/${id}/invoice?token=${safeStorage.get("accessToken")}`,
-      "_blank"
-    );
+  const downloadInvoice = async (id) => {
+    try {
+      await downloadFile(`/booking/${id}/invoice`, `invoice-${id}.pdf`);
+      toast.success("Invoice downloaded successfully");
+    } catch {
+      toast.error("Failed to download Invoice");
+    }
+  };
 
   const filteredLoads = loads.filter((load) => {
     const matchesSearch =

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { getApiBaseUrl } from "../api/baseUrl";
-import { safeStorage } from "../utils/storage";
+import { downloadFile } from "../utils/download";
+import toast from "react-hot-toast";
 import Skeleton from "../components/Skeleton";
 
 export default function Dashboard() {
@@ -21,19 +21,23 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const API_BASE = getApiBaseUrl();
+  const downloadBilty = async (id) => {
+    try {
+      await downloadFile(`/booking/${id}/bilty`, `bilty-${id}.pdf`);
+      toast.success("Bilty downloaded successfully");
+    } catch {
+      toast.error("Failed to download Bilty");
+    }
+  };
 
-  const downloadBilty = (id) =>
-    window.open(
-      `${API_BASE}/booking/${id}/bilty?token=${safeStorage.get("accessToken")}`,
-      "_blank",
-    );
-
-  const downloadInvoice = (id) =>
-    window.open(
-      `${API_BASE}/booking/${id}/invoice?token=${safeStorage.get("accessToken")}`,
-      "_blank",
-    );
+  const downloadInvoice = async (id) => {
+    try {
+      await downloadFile(`/booking/${id}/invoice`, `invoice-${id}.pdf`);
+      toast.success("Invoice downloaded successfully");
+    } catch {
+      toast.error("Failed to download Invoice");
+    }
+  };
 
   return (
     <div className="page dashboard-page">
